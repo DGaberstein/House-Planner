@@ -3,13 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>House Planner</title>
+    <title>House Planner - Blueprint Style</title>
     <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a3d62; /* Dark blue background */
+            color: #ffffff; /* White text */
+            font-family: 'Courier New', Courier, monospace; /* Monospace font for technical look */
+        }
+
+        .blueprint-container {
+            background-color: #1e5f74; /* Lighter blue for contrast */
+            border: 1px solid #5dade2; /* Light blue border */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .blueprint-grid {
+            background-image: linear-gradient(#5dade2 1px, transparent 1px), linear-gradient(to right, #5dade2 1px, transparent 1px);
+            background-size: 20px 20px; /* Grid size */
+        }
+
+        input[type="number"] {
+            background-color: #0c2c48; /* Dark input field */
+            color: #ffffff; /* White text in input */
+            border: 1px solid #5dade2; /* Border matching theme */
+        }
+
+        button {
+            background-color: #5dade2; /* Light blue button */
+            color: #0a3d62; /* Dark blue text */
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #75aadb; /* Darker blue on hover */
+        }
+
+        .threejs-container {
+            border: 1px solid #5dade2; /* Border for the 3D container */
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
@@ -25,7 +66,7 @@
                 if (suggestion && mountRef.current) {
                     const scene = new THREE.Scene();
                     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-                    const renderer = new THREE.WebGLRenderer();
+                    const renderer = new THREE.WebGLRenderer({ alpha: true });
                     
                     renderer.setSize(400, 400);
                     mountRef.current.innerHTML = '';
@@ -33,13 +74,13 @@
 
                     // Create a simple house model
                     const geometry = new THREE.BoxGeometry(suggestion.width, 3, suggestion.length);
-                    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+                    const material = new THREE.MeshBasicMaterial({ color: 0x5dade2, wireframe: true });
                     const house = new THREE.Mesh(geometry, material);
                     scene.add(house);
 
                     // Add ground plane
                     const planeGeometry = new THREE.PlaneGeometry(20, 20);
-                    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc, side: THREE.DoubleSide });
+                    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x1e5f74, side: THREE.DoubleSide });
                     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
                     plane.rotation.x = Math.PI / 2;
                     plane.position.y = -1.5;
@@ -77,12 +118,12 @@
             };
 
             return (
-                <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
+                <div className="max-w-2xl mx-auto mt-10 p-6 blueprint-container blueprint-grid">
                     <h2 className="text-2xl font-bold mb-4">House Planner</h2>
                     <div className="space-y-4">
                         <div className="flex space-x-4">
                             <div className="flex-1">
-                                <label htmlFor="length" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="length" className="block text-sm font-medium">
                                     Plot Length (m)
                                 </label>
                                 <input
@@ -91,11 +132,11 @@
                                     value={plotLength}
                                     onChange={(e) => setPlotLength(e.target.value)}
                                     placeholder="Enter plot length"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                    className="mt-1 block w-full border rounded-md shadow-sm p-2"
                                 />
                             </div>
                             <div className="flex-1">
-                                <label htmlFor="width" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="width" className="block text-sm font-medium">
                                     Plot Width (m)
                                 </label>
                                 <input
@@ -104,13 +145,13 @@
                                     value={plotWidth}
                                     onChange={(e) => setPlotWidth(e.target.value)}
                                     placeholder="Enter plot width"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                                    className="mt-1 block w-full border rounded-md shadow-sm p-2"
                                 />
                             </div>
                         </div>
                         <button 
                             onClick={generateSuggestion}
-                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            className="w-full font-bold py-2 px-4 rounded"
                         >
                             Generate Suggestion
                         </button>
@@ -121,10 +162,10 @@
                             <p>Length: {suggestion.length.toFixed(2)} m</p>
                             <p>Width: {suggestion.width.toFixed(2)} m</p>
                             <p>Recommended rooms: {suggestion.rooms}</p>
-                            <div ref={mountRef} className="mt-4 border border-gray-300 rounded"></div>
+                            <div ref={mountRef} className="mt-4 threejs-container"></div>
                         </div>
                     )}
-                    <p className="mt-4 text-sm text-gray-500">
+                    <p className="mt-4 text-sm">
                         Note: This is a basic suggestion and 3D model. Consult with an architect for detailed plans.
                     </p>
                 </div>
